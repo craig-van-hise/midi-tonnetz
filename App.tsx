@@ -124,6 +124,23 @@ function App() {
     return pcSet;
   }, [midiNoteState.held, bypass]);
 
+  const handleTogglePitchClass = (pc: number) => {
+    setMidiNoteState(prev => {
+      const isCurrentlyActive = Array.from(prev.held.keys()).some(key => key % 12 === pc);
+      const nextHeld = new Map(prev.held);
+      if (isCurrentlyActive) {
+        for (const key of prev.held.keys()) {
+          if (key % 12 === pc) {
+            nextHeld.delete(key);
+          }
+        }
+      } else {
+        nextHeld.set(pc, 100);
+      }
+      return { ...prev, held: nextHeld };
+    });
+  };
+
   const handlePanic = () => {
     setMidiNoteState(prev => ({
       ...prev,
@@ -145,7 +162,7 @@ function App() {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-gray-50 flex flex-col">
+    <div className="h-screen w-screen overflow-hidden bg-gray-50 flex flex-col relative">
       <TitleBar 
         bypass={bypass} 
         setBypass={setBypass}
@@ -157,7 +174,11 @@ function App() {
         setActiveChannels={setActiveChannels}
       />
       <div className="flex-1 overflow-auto flex flex-col items-center justify-center p-4">
-        <TonnetzGridContainer externalPitchClasses={midiPitchClasses} clearSignal={midiNoteState.chordStarts} />
+        <TonnetzGridContainer 
+          externalPitchClasses={midiPitchClasses} 
+          clearSignal={midiNoteState.chordStarts} 
+          onTogglePitchClass={handleTogglePitchClass}
+        />
       </div>
     </div>
   );

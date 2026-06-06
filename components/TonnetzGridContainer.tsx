@@ -1,41 +1,19 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import TonnetzGrid from './TonnetzGrid';
 import { TRIAD_TYPES } from '../constants';
-import { PitchClassSet } from '../types';
+import { NavContainer } from './navigation/NavContainer';
 
 interface TonnetzGridContainerProps {
     externalPitchClasses?: Set<number>;
     clearSignal?: number;
+    onTogglePitchClass?: (pc: number) => void;
 }
 
-const TonnetzGridContainer: React.FC<TonnetzGridContainerProps> = ({ externalPitchClasses = new Set(), clearSignal = 0 }) => {
+const TonnetzGridContainer: React.FC<TonnetzGridContainerProps> = ({ externalPitchClasses = new Set(), clearSignal = 0, onTogglePitchClass }) => {
     // State
     const [selectedTriadIndex, setSelectedTriadIndex] = useState(0); // Default to Major
-    const [activePitchClasses, setActivePitchClasses] = useState<PitchClassSet>(new Set());
 
     const currentTriad = TRIAD_TYPES[selectedTriadIndex];
-
-    // Initialization Logic
-    // When triad changes, reset active notes to that triad's set
-    useEffect(() => {
-        const newSet = new Set(currentTriad.set);
-        setActivePitchClasses(newSet);
-    }, [selectedTriadIndex, currentTriad]);
-
-    useEffect(() => {
-        if (clearSignal > 0) {
-            setActivePitchClasses(new Set());
-        }
-    }, [clearSignal]);
-
-    // Combine internal and external pitch classes
-    const combinedPitchClasses = useMemo(() => {
-        const combined = new Set(activePitchClasses);
-        for (const pc of externalPitchClasses) {
-            combined.add(pc);
-        }
-        return combined;
-    }, [activePitchClasses, externalPitchClasses]);
 
     // Calculation of i1 and i2
     // i1 = set[2] (3rd element)
@@ -45,15 +23,9 @@ const TonnetzGridContainer: React.FC<TonnetzGridContainerProps> = ({ externalPit
     const i2 = currentTriad.set[1];
 
     const handleToggleNote = (noteIndex: number) => {
-        setActivePitchClasses(prev => {
-            const next = new Set(prev);
-            if (next.has(noteIndex)) {
-                next.delete(noteIndex);
-            } else {
-                next.add(noteIndex);
-            }
-            return next;
-        });
+        if (onTogglePitchClass) {
+            onTogglePitchClass(noteIndex);
+        }
     };
 
     return (
@@ -81,7 +53,7 @@ const TonnetzGridContainer: React.FC<TonnetzGridContainerProps> = ({ externalPit
             {/* The Grid Canvas */}
             <div className="flex-1 w-full relative">
                 <TonnetzGrid 
-                    activePitchClasses={combinedPitchClasses}
+                    activePitchClasses={externalPitchClasses}
                     i1={i1}
                     i2={i2}
                     onToggleNote={handleToggleNote}
@@ -100,6 +72,11 @@ const TonnetzGridContainer: React.FC<TonnetzGridContainerProps> = ({ externalPit
                 <div className="flex items-center gap-2"><span className="material-symbols-outlined text-[16px]">swipe</span> Scroll to Pan</div>
                 <div className="flex items-center gap-2"><span className="material-symbols-outlined text-[16px]">zoom_in</span> ⌘ + Scroll to Zoom</div>
                 <div className="flex items-center gap-2"><span className="material-symbols-outlined text-[16px]">ads_click</span> Click Node to Toggle</div>
+            </div>
+
+            {/* Navigation D-pad floating overlay */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 origin-bottom scale-[0.85] pointer-events-auto">
+                <NavContainer />
             </div>
         </div>
     );

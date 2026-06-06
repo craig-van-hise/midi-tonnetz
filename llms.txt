@@ -1,0 +1,25 @@
+# VV | MIDI Tonnetz Explorer
+
+An interactive web-based Tonnetz Explorer that visualizes MIDI input on a Euler-Riemann Tonnetz grid.
+
+## File Map
+
+- [App.tsx](file:///Users/vv2024/Documents/Repos - vv2024/MIDI/WebApps/midi-tonnetz/App.tsx) - Main Application entry point. Integrates Web MIDI API access, handles device selection, channels filtering, panic button logic, and state management for active notes.
+- [components/TonnetzGridContainer.tsx](file:///Users/vv2024/Documents/Repos - vv2024/MIDI/WebApps/midi-tonnetz/components/TonnetzGridContainer.tsx) - Wraps the canvas-based grid. Exposes controls for switching Triad Mappings (Major, Minor, etc.) and visualizes active axis interval sizes. Integrates the floating navigation controller overlay.
+- [components/TonnetzGrid.tsx](file:///Users/vv2024/Documents/Repos - vv2024/MIDI/WebApps/midi-tonnetz/components/TonnetzGrid.tsx) - High-performance HTML5 Canvas renderer that handles drawing nodes, connecting line grids, highlighting active triads, and handling viewport translation (pan & zoom) and click toggling.
+- [components/TitleBar.tsx](file:///Users/vv2024/Documents/Repos - vv2024/MIDI/WebApps/midi-tonnetz/components/TitleBar.tsx) - Top navigation and control bar for MIDI options, bypass, and channel filters.
+- [components/navigation/NavContainer.tsx](file:///Users/vv2024/Documents/Repos - vv2024/MIDI/WebApps/midi-tonnetz/components/navigation/NavContainer.tsx) - Orchestrates state (pressed buttons, configs, MIDI learn, and context menu triggers) for the D-Pad control deck.
+- [components/navigation/NavControllerOriginal.tsx](file:///Users/vv2024/Documents/Repos - vv2024/MIDI/WebApps/midi-tonnetz/components/navigation/NavControllerOriginal.tsx) - Presentation layer for the SVG D-Pad block arrows and circular action buttons, featuring fluid animations and collapse/expand dot controls.
+- [components/navigation/ContextMenus.tsx](file:///Users/vv2024/Documents/Repos - vv2024/MIDI/WebApps/midi-tonnetz/components/navigation/ContextMenus.tsx) - Arrow and global options context menus allowing configurations of step sizes, MIDI note assignments, and toggles for active elements.
+- [components/navigation/types.ts](file:///Users/vv2024/Documents/Repos - vv2024/MIDI/WebApps/midi-tonnetz/components/navigation/types.ts) - TypeScript definitions for button configurations, global settings, learn states, and context menu layouts.
+- [constants.ts](file:///Users/vv2024/Documents/Repos - vv2024/MIDI/WebApps/midi-tonnetz/constants.ts) - Pitch class names, default triad types, intervals mapping, and key coordinates.
+- [types.ts](file:///Users/vv2024/Documents/Repos - vv2024/MIDI/WebApps/midi-tonnetz/types.ts) - Shared typescript interfaces.
+- [index.html](file:///Users/vv2024/Documents/Repos - vv2024/MIDI/WebApps/midi-tonnetz/index.html) - HTML root importing Tailwind CSS via CDN and Google Fonts.
+
+## Design Patterns & Guidelines
+
+- **MIDI Note Tracking**: MIDI note numbers (0-127) are parsed, filtered, and then compressed into Pitch Classes (0-11) by calculating `note % 12`.
+- **Canvas Rendering**: High-performance canvas drawing loop using `requestAnimationFrame`. Grid scales with `window.devicePixelRatio` to avoid blurriness on Retina/High-DPI displays.
+- **Coordinates & Skew**: The visual Euler-Riemann grid uses basis vectors rotated at 60 degrees. Viewport offsets and zoom factors translate screen pixel coordinates to floating-point grid cells for click testing.
+- **Floating Overlay Controls**: The floating D-Pad control deck supports expansion/collapse, customization via right-click menus, and a MIDI learn flow for binding controls to hardware MIDI keys.
+- **Styling**: Leverages Tailwind CSS classnames directly. Keep CSS CDN imports updated.

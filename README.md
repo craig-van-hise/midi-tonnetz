@@ -36,7 +36,41 @@ An interactive web-based Tonnetz Explorer that visualizes MIDI input on a Euler-
 
 ## Built With
 
-- **React** & **TypeScript**
-- **Vite**
-- **Tailwind CSS**
+- **React 19** & **TypeScript**
+- **Vite 6**
+- **Tailwind CSS** (via CDN)
+- **Lucide React** (icons)
 - **Web MIDI API**
+
+## Project Structure
+
+```
+/Users/vv2024/Documents/Repos - vv2024/MIDI/WebApps/midi-tonnetz
+├── App.tsx
+├── PROJECT_CONTEXT_BUNDLE.md
+├── PROJECT_STATE.md
+├── README.md
+├── components
+│   ├── Modal.tsx
+│   ├── TitleBar.tsx
+│   ├── TonnetzGrid.tsx
+│   ├── TonnetzGridContainer.tsx
+│   └── navigation
+│       ├── ContextMenus.tsx
+│       ├── NavContainer.tsx
+│       ├── NavControllerOriginal.tsx
+│       └── types.ts
+├── constants.ts
+├── index.html
+├── index.tsx
+├── llms.txt
+├── metadata.json
+├── package-lock.json
+├── package.json
+├── project_tree.txt
+├── tsconfig.json
+├── types.ts
+└── vite.config.ts
+```
+
+
