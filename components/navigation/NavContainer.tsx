@@ -12,7 +12,7 @@ const DEFAULT_CONFIG: ButtonConfig = {
 
 const INITIAL_BUTTONS: ButtonId[] = ['UP', 'DOWN', 'LEFT', 'RIGHT', 'UP_LEFT', 'UP_RIGHT', 'DOWN_LEFT', 'DOWN_RIGHT', 'PLAY', 'HOME'];
 
-export const NavContainer = () => {
+export const NavContainer = ({ onDirectionalTrigger }: { onDirectionalTrigger?: (direction: string) => void }) => {
   // --- STATE ---
   const [pressed, setPressed] = useState<Record<ButtonId, boolean>>({} as any);
   
@@ -45,6 +45,11 @@ export const NavContainer = () => {
       console.log(`[MOCK MIDI] Note ON | Ch: ${configs[id].midiChannel} | Note: ${configs[id].midiNote}`);
     }
     setPressed(prev => ({ ...prev, [id]: true }));
+
+    const DIRECTIONS = ['UP', 'DOWN', 'LEFT', 'RIGHT', 'UP_LEFT', 'UP_RIGHT', 'DOWN_LEFT', 'DOWN_RIGHT'];
+    if (DIRECTIONS.includes(id) && onDirectionalTrigger) {
+      onDirectionalTrigger(id);
+    }
   };
 
   const handleButtonUp = (id: ButtonId) => {

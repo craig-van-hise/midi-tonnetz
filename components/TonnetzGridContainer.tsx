@@ -7,9 +7,10 @@ interface TonnetzGridContainerProps {
     externalPitchClasses?: Set<number>;
     clearSignal?: number;
     onTogglePitchClass?: (pc: number) => void;
+    onDirectionalTrigger?: (direction: string) => void;
 }
 
-const TonnetzGridContainer: React.FC<TonnetzGridContainerProps> = ({ externalPitchClasses = new Set(), clearSignal = 0, onTogglePitchClass }) => {
+const TonnetzGridContainer: React.FC<TonnetzGridContainerProps> = ({ externalPitchClasses = new Set(), clearSignal = 0, onTogglePitchClass, onDirectionalTrigger }) => {
     // State
     const [selectedTriadIndex, setSelectedTriadIndex] = useState(0); // Default to Major
 
@@ -62,8 +63,8 @@ const TonnetzGridContainer: React.FC<TonnetzGridContainerProps> = ({ externalPit
 
             <div className="absolute bottom-4 right-4 z-10 text-right bg-white p-3 rounded-lg text-gray-500 text-xs shadow-md border border-gray-100">
                 <p>
-                    Grid Axis X: <strong className="text-gray-800">+{i1}</strong> semitones <br/>
-                    Grid Axis Y: <strong className="text-gray-800">+{i2}</strong> semitones
+                     Grid Axis X: <strong className="text-gray-800">+{i1}</strong> semitones <br/>
+                     Grid Axis Y: <strong className="text-gray-800">+{i2}</strong> semitones
                 </p>
             </div>
             
@@ -76,7 +77,7 @@ const TonnetzGridContainer: React.FC<TonnetzGridContainerProps> = ({ externalPit
 
             {/* Navigation D-pad floating overlay */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 origin-bottom scale-[0.85] pointer-events-auto">
-                <NavContainer />
+                <NavContainer onDirectionalTrigger={onDirectionalTrigger} />
             </div>
         </div>
     );

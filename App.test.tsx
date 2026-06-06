@@ -115,3 +115,78 @@ describe('App Phase 2 TDD: Modulo-12 Latch Mutation', () => {
     expect(mockContainerProps.externalPitchClasses.has(4)).toBe(true);
   });
 });
+
+import * as useTonnetzTransformModule from './hooks/useTonnetzTransform';
+
+describe('App Phase 3 TDD: UI Integration & Output Hookup', () => {
+  let midiListener: any = null;
+  const mockMidiInput = {
+    id: 'mock-input-id',
+    name: 'Mock MIDI Input',
+    addEventListener: vi.fn((event, listener) => {
+      if (event === 'midimessage') {
+        midiListener = listener;
+      }
+    }),
+    removeEventListener: vi.fn(),
+  };
+
+  beforeEach(() => {
+    midiListener = null;
+    vi.restoreAllMocks();
+
+    const mockAccess = {
+      inputs: {
+        values: () => [mockMidiInput],
+        get: () => mockMidiInput,
+      },
+      outputs: {
+        forEach: vi.fn(),
+      },
+      onstatechange: null,
+    };
+
+    vi.stubGlobal('navigator', {
+      requestMIDIAccess: vi.fn().mockResolvedValue(mockAccess)
+    });
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('Test Case 1: Given an active transformation state, When a new physical MIDI Note On event occurs, Assert initTransformState is triggered to capture the newly played set', async () => {
+    const initSpy = vi.fn();
+    vi.spyOn(useTonnetzTransformModule, 'useTonnetzTransform').mockReturnValue({
+      state: { I: [0, 4, 7], r: 0, F: 0 },
+      initTransformState: initSpy,
+      handleDirectionalTrigger: vi.fn(),
+      getOutputNotes: vi.fn(() => [0, 4, 7]),
+    });
+
+    const { getByRole } = render(<App />);
+
+    // Wait for requestMIDIAccess to resolve
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    // Select the mock input from the select dropdown
+    const select = getByRole('combobox');
+    await act(async () => {
+      fireEvent.change(select, { target: { value: 'mock-input-id' } });
+    });
+
+    // Trigger physical MIDI Note On
+    await act(async () => {
+      midiListener({ data: [0x90, 60, 100] });
+    });
+
+    // Verify initTransformState was called with the set containing pitch class 0
+    expect(initSpy).toHaveBeenCalled();
+    const calledWithSet = initSpy.mock.calls[0][0];
+    expect(calledWithSet instanceof Set).toBe(true);
+    expect(calledWithSet.has(0)).toBe(true);
+  });
+});
+

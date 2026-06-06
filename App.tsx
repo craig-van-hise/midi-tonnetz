@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import TonnetzGridContainer from './components/TonnetzGridContainer';
 import { TitleBar } from './components/TitleBar';
+import { useTonnetzTransform } from './hooks/useTonnetzTransform';
 
 function App() {
   const [bypass, setBypass] = useState(false);
   const [midiInputs, setMidiInputs] = useState<any[]>([]);
   const [selectedInputId, setSelectedInputId] = useState<string>('');
   const [activeChannels, setActiveChannels] = useState<Set<number>>(new Set(Array.from({length: 16}, (_, i) => i + 1)));
+
+  const { initTransformState, handleDirectionalTrigger, getOutputNotes } = useTonnetzTransform();
 
   // Map of currently active MIDI note numbers (0-127) to velocity. 
   const [midiNoteState, setMidiNoteState] = useState({
@@ -50,6 +53,14 @@ function App() {
 
           nextDown.set(data1, velocity);
           nextHeld.set(data1, velocity);
+
+          const nextPCs = new Set<number>();
+          for (const note of nextHeld.keys()) {
+            nextPCs.add(note % 12);
+          }
+          setTimeout(() => {
+            initTransformState(nextPCs);
+          }, 0);
 
           return { down: nextDown, held: nextHeld, chordStarts: nextChordStarts };
         });
@@ -124,6 +135,27 @@ function App() {
     return pcSet;
   }, [midiNoteState.held, bypass]);
 
+  // Overwrite held state when transformation updates
+  useEffect(() => {
+    const transformedNotes = getOutputNotes();
+    if (transformedNotes.length > 0) {
+      setMidiNoteState(prev => {
+        const currentHeldPC = Array.from(prev.held.keys()).map(n => n % 12).sort().join(',');
+        const newHeldPC = [...transformedNotes].sort().join(',');
+        if (currentHeldPC === newHeldPC) return prev;
+
+        const nextHeld = new Map<number, number>();
+        transformedNotes.forEach(note => {
+          nextHeld.set(note, 100);
+        });
+        return {
+          ...prev,
+          held: nextHeld
+        };
+      });
+    }
+  }, [getOutputNotes]);
+
   const handleTogglePitchClass = (pc: number) => {
     setMidiNoteState(prev => {
       const isCurrentlyActive = Array.from(prev.held.keys()).some(key => key % 12 === pc);
@@ -137,6 +169,15 @@ function App() {
       } else {
         nextHeld.set(pc, 100);
       }
+
+      const nextPCs = new Set<number>();
+      for (const note of nextHeld.keys()) {
+        nextPCs.add(note % 12);
+      }
+      setTimeout(() => {
+        initTransformState(nextPCs);
+      }, 0);
+
       return { ...prev, held: nextHeld };
     });
   };
@@ -178,6 +219,7 @@ function App() {
           externalPitchClasses={midiPitchClasses} 
           clearSignal={midiNoteState.chordStarts} 
           onTogglePitchClass={handleTogglePitchClass}
+          onDirectionalTrigger={handleDirectionalTrigger}
         />
       </div>
     </div>
